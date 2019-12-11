@@ -1,0 +1,154 @@
+﻿<style>
+    .map {
+        width: 100%;
+        height: 100vh;
+    }
+
+    .background-blue {
+        background-color: dodgerblue;
+    }
+
+    .title {
+        font-family: 'Times New Roman';
+        font-size: large;
+        font-weight: bolder
+    }
+    .ol-popup {
+        position: absolute;
+        background-color: white;
+        -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+        filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #cccccc;
+        bottom: 12px;
+        left: -50px;
+        min-width: 280px;
+    }
+
+        .ol-popup:after, .ol-popup:before {
+            top: 100%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .ol-popup:after {
+            border-top-color: white;
+            border-width: 10px;
+            left: 48px;
+            margin-left: -10px;
+        }
+
+        .ol-popup:before {
+            border-top-color: #cccccc;
+            border-width: 11px;
+            left: 48px;
+            margin-left: -11px;
+        }
+
+    .ol-popup-closer {
+        text-decoration: none;
+        position: absolute;
+        top: 2px;
+        right: 8px;
+    }
+
+        .ol-popup-closer:after {
+            content: "✖";
+        }
+</style>
+<!--<link href="/Content/ol/ol.css" rel="stylesheet" />-->
+
+<link href="http://image.nikbanoo.com/ol.css" rel="stylesheet" />
+<div>
+    <input type="button" title="add new share location" value="add share location" data-toggle="modal" data-target="#locationModal" (click)="updateMapLoc()" />
+    <div id="popup" style="background-color:white;" title="Location details" class="ol-popup">
+        <div class="modal-header text-success">
+            <h4 style="font-weight:bolder">Location Details</h4>
+            <div id="popup-closer" class="ol-popup-closer"></div> 
+        </div>
+        <div id="popup-content" class="popup-content" name="popup-content">
+            <h5 style="font-weight:bold">Name:<span style="font-weight:normal!important" class="nameLoc"></span> </h5>
+            <h5 style="font-weight:bold">Type:<span style="font-weight:normal!important" class="typeLoc"></span> </h5>
+            <h5 style="font-weight:bold">Logo:<img  class="logoLoc" /></h5>
+
+        </div>
+        <div style="float:right">
+            <input  type="button" value="Close" class="btn btn-warning" >
+            <input type="button" value="Edit" class="btn btn-primary" />
+        </div>
+    </div>
+
+</div>
+<div id="locationModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header background-blue ">
+                <h5 class="modal-title title">add new share location</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form [formGroup]="locationForm" (ngSubmit)="save()" #formDir="ngForm" novalidate>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <div class="col-md-3">Location name: </div>
+                        <div class="col-md-9">
+                            <input type="text" placeholder="Enter location name" formControlName="locName" class="form-control">
+                            <span class="text-danger" *ngIf="locName.invalid && formDir.submitted">
+                                Name is required.
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-3">Location on map: </div>
+                        <div class="col-md-9">
+                            <div id="mapLoc" style="width:100%;height:200px" (click)="getCoord($event)"></div>
+                            <input type="hidden" formControlName="lat" class="form-control">
+                            <input type="hidden" formControlName="lng" class="form-control">
+
+                            <span class="text-danger" *ngIf="(lat.invalid || lng.invalid) && formDir.submitted">
+                                Latitude and longitude is required
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-3">Location type: </div>
+                        <div class="col-md-9">
+                            <select formControlName="type" class="form-control">
+                                <option value=1>Business</option>
+                                <option value=2>Health Center</option>
+                                <option value=2>Home</option>
+                                <option value=2>Education Center</option>
+
+                            </select>
+                            <span class="text-danger" *ngIf="type.invalid && formDir.submitted">
+                                Type location is required
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-3">Location logo: </div>
+                        <div class="col-md-9">
+                            <input type="file" class="form-control" (change)="onLogoPicked($event.target.files)">
+                        </div>
+                    </div>
+
+                    <div class="form-group modal-footer">
+                        <input type="reset" value="Cancel" class="btn" data-dismiss="modal" #closeModal>
+                        <input type="submit" value="Save" class="btn btn-primary" />
+                    </div>
+                </div>
+            </form>
+
+
+        </div>
+
+    </div>
+</div>
+<div id="map" class="map" (click)="getLocationDetail($event)"></div>
